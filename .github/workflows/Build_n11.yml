@@ -1,4 +1,4 @@
-name: Build_n1
+name: Build_n11
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -16,9 +16,13 @@ jobs:
         uses: actions/checkout@main
 
       - name: Free disk space
-        uses: xiangfeidexiaohuo/actions@2404
-        with:
-          build-mount-path: /home/runner/work/isos-build/isos-build
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker system prune -f
+          sudo apt-get clean
+          df -h
 
       - name: Initialization environment
         env:
@@ -33,7 +37,6 @@ jobs:
       - name: Clone source code
         env: 
           REPO_URL: https://github.com/istoreos/istoreos
-          # REPO_BRANCH: istoreos-22.03
           REPO_BRANCH: openwrt-24.10
         run: |
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -67,7 +70,7 @@ jobs:
         run: |
           mkdir -p artifacts/${{ matrix.model }}
           cp openwrt/.config artifacts/${{ matrix.model }}/n1.config
-          cp openwrt/bin/targets/amlogic/meson/istoreos-amlogic-meson-phicomm_n1-squashfs-sysupgrade.img.gz artifacts/${{ matrix.model }}/istoreos-22.03-$(date '+%Y%m%d%H')-phicomm_n1-squashfs-sysupgrade.img.gz
+          cp openwrt/bin/targets/amlogic/meson/istoreos-amlogic-meson-phicomm_n1-squashfs-sysupgrade.img.gz artifacts/${{ matrix.model }}/istoreos-24.10-$(date '+%Y%m%d%H')-phicomm_n1-squashfs-sysupgrade.img.gz
 
       - name: Upload Firmware Artifacts
         uses: actions/upload-artifact@main
